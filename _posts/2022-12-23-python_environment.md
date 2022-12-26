@@ -384,7 +384,121 @@ $ yum install -y MySQL-python
 
 # Linux下的Python环境
 
+## Python3 源码编译方式安装
 
+需要`root`身份安装。
+
+
+
+安装依赖如下：
+
+```sh
+$ yum -y install gcc
+$ yum -y install zlib-devel bzip2-devel openssl-devel ncurses-devel sqlite-devel readline-devel tk-devel gdbm-devel db4-devel libpcap-devel xz-devel
+```
+
+源码编译安装python，需要有`gcc`，务必确认gcc版本正确，否则安装完的python可能会在安装第三方库时出现奇怪的问题。
+
+
+
+可能你还见过用这个方式安装相关依赖：
+
+```sh
+$ yum -y groupinstall "Development tools"
+```
+
+这包括上面的大部分依赖，但会有缺漏，故执行上一条命令更稳妥。
+
+- `yum -y install libffi-devel`  3.7版本需要这个依赖。
+
+
+
+安装：
+
+```sh
+$ wget https://www.python.org/ftp/python/3.7.10/Python-3.7.10.tgz
+# 解压，切换root，进入该安装包解压后的源码目录
+
+$ ./configure  --prefix=/usr/local/python3.7
+$ make && make install
+```
+
+
+
+安装完成，创建软连接，便于调用：
+
+```sh
+$ ln -s /usr/local/python3.7/bin/python3.7  /usr/bin/python3
+$ ln -s /usr/local/python3.7/bin/pip3.7  /usr/bin/pip3
+```
+
+注意`python3.7`替换为真正安装的Python版本即可。3版本，一般带有`pip`工具了。
+
+
+
+一些可能的报错，以及解决方法：
+
+- `zipimport.ZipImportError: can’t decompress data`
+    - 因为缺少zlib 的相关工具包导致，安装`zlib`、`zlib-devel`依赖即可
+- 执行pip时，显示找不到ssl模块
+    - 重新安装需要依赖，即可正常使用pip：
+
+```sh
+$ yum install -y openssl
+# 进入python3源码安装包
+$ make clean
+$ make && make install
+```
+
+
+
+## Python2 源码编译安装
+
+过程基本同3，以下只做简单记录。
+
+需要root身份安装。
+
+依赖：
+
+```sh
+$ yum install -y gcc
+$ yum install -y zlib zlib-devel bzip2-devel openssl  openssl-devel ncurses-devel sqlite-devel readline-devel tk-devel gdbm-devel db4-devel libpcap-devel xz-devel  readline-devel sqlite-devel bzip2-devel.i686 openssl-devel.i686 gdbm-devel.i686 libdbi-devel.i686 ncurses-libs，zlib-devel.i686
+$ yum install -y python-devel.x86_64  # 安装uwsgi时可能出现的报错，需要该依赖
+```
+
+安装：
+
+```sh
+$ wget https://www.python.org/ftp/python/2.7.18/Python-2.7.18.tgz
+$ tar -zxf Python-2.7.18.tgz
+# 切换root，进入安装包源码目录
+$ ./configure --prefix=/usr/local/python2.7.18
+$ make && make install
+# 安装完成，创建软连接，便于调用
+$ ln -s /usr/local/python2.7.18/bin/python2 /usr/bin/python2
+$ ln -s /usr/local/python2.7.18/bin/python2.7  /usr/bin/python2.7
+# 确认安装成功
+$ python2 -V
+```
+
+
+
+可能的报错和解决：
+
+- 使用yum报错：`No module named yum`
+
+    - 修改`/usr/bin/yum` 第一行指定为旧版本的python路径即可。
+
+- centos 7以上，如上修改后在pip安装包时可能还有报错：
+
+    ```sh
+    Traceback (most recent call last):
+    File "/usr/libexec/urlgrabber-ext-down", line 22, in 
+        from urlgrabber.grabber import \
+    ImportError: No module named urlgrabber.grabber
+    ```
+
+    - 需要同样修改 /usr/libexec/urlgrabber-ext-down
 
 
 
